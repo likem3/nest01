@@ -1,6 +1,6 @@
 // import { IsUnique, isUniqueDb } from "@youba/nestjs-dbvalidator";
 import { IsEmail, IsNotEmpty, MinLength, Validate } from "class-validator";
-import { IsUniqueConstraint, isUnique } from "src/utils/validators";
+import { IsUniqueConstraint, Match, isUnique } from "src/utils/validators";
 
 
 export class UserCreateDto {
@@ -13,6 +13,7 @@ export class UserCreateDto {
     @isUnique({tableName: 'users', column: 'email'})
     email: string;
 
+    // @Match('/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/', {message: 'password too weak'})
     @IsNotEmpty()
     @MinLength(3)
     password: 'string';

@@ -1,4 +1,4 @@
-import { BaseEntity, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 
 export class BaseCustomEntity extends BaseEntity {
     @PrimaryGeneratedColumn({
@@ -16,5 +16,8 @@ export class BaseCustomEntity extends BaseEntity {
         comment: "data update datetime",
         type: "timestamptz"
     })
-    updated_at: Date
+    updated_at: Date;
+
+    @DeleteDateColumn()
+    public deletedAt: Date;
 }
