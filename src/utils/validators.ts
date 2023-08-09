@@ -1,37 +1,51 @@
-import { InjectRepository } from "@nestjs/typeorm";
-import { ValidationArguments, ValidatorConstraintInterface, registerDecorator } from "class-validator";
-import { User } from "src/users/users.entity";
-import { Repository } from "typeorm";
+import { Injectable } from "@nestjs/common";
+import { ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, registerDecorator } from "class-validator";
+import { EntityManager } from "typeorm";
 
-export class UniqueValidator implements ValidatorConstraintInterface{
-    constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>
-    ) {}
+// decorator options interface
+export type IsUniqeInterface = {
+    tableName: string,
+    column: string
+}
 
-    async validate(value: any, args: ValidationArguments) {
-        const [relatedPropertyName] = args.constraints;
-        const existingUser = await this.userRepository.findOne({
-            where: {[relatedPropertyName]: value},
-        })
-        console.log(existingUser)
-        return !existingUser
+@ValidatorConstraint({name: 'IsUniqueConstraint', async: true})
+@Injectable()
+export class IsUniqueConstraint implements ValidatorConstraintInterface {
+    constructor(private readonly entityManager: EntityManager) {}
+    async validate(
+        value: any,
+        args?: ValidationArguments
+        ): Promise<boolean> {
+            // catch options from decorator
+            const {tableName, column}: IsUniqeInterface = args.constraints[0]
+
+            // database query check data is exists
+            const dataExist = await this.entityManager.getRepository(tableName)
+                .createQueryBuilder(tableName)
+                .where({[column]: value})
+                .getExists()
+            
+            return !dataExist
     }
 
-    defaultMessage(args: ValidationArguments): string {
-        const[relatedPropertyName] = args.constraints
-        return `${relatedPropertyName} must be unique.`
+    defaultMessage(validationArguments?: ValidationArguments): string {
+        // return custom field message
+        const field: string = validationArguments.property
+        return `${field} is already exist`
     }
 }
 
-export function IsUnique(property: string) {
-    return (object: Record<string, any>, propertyName: string) => {
+
+// decorator function
+export function isUnique(options: IsUniqeInterface, validationOptions?: ValidationOptions) {
+    return function (object: any, propertyName: string) {
         registerDecorator({
+            name: 'isUnique',
             target: object.constructor,
-            propertyName,
-            options: {message: `${propertyName} must be unique.`},
-            constraints: [property],
-            validator: UniqueValidator,
+            propertyName: propertyName,
+            options: validationOptions,
+            constraints: [options],
+            validator: IsUniqueConstraint,
         })
     }
 }

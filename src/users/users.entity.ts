@@ -1,6 +1,5 @@
-
 import { BaseCustomEntity } from "src/utils/entity";
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm"
+import { Column, Entity } from "typeorm"
 
 
 @Entity('users')
