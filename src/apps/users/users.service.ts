@@ -38,10 +38,25 @@ export class UsersService {
         return this.userRepository.findOneBy({id})
     }
 
+    findOneByEmail(email: string): Promise<User | null> {
+        return this.userRepository.findOneBy({email})
+    }
+
     async delete(id: number): Promise<void> {
         const deleteResponse = await this.userRepository.softDelete(id)
         if(!deleteResponse.affected) throw new HttpException('Invalid id', HttpStatus.NOT_FOUND)
         else throw new HttpException('deleted', HttpStatus.NO_CONTENT)
         
+    }
+
+    async auth(email: string, password: string): Promise<User|null> {
+        const user = await this.userRepository.findOneBy({email})
+
+        if(!user) return null
+
+        const isMatch: boolean = await bcrypt.compare(password, user.password)
+
+        if (!isMatch) return null
+        return user
     }
 }

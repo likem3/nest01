@@ -8,7 +8,7 @@ export class UsersController {
     constructor(private readonly UserService: UsersService) {}
 
     @Get()
-    getUsers(@Query('status') status: 'active'| 'nonactive') {
+    getUsers(@Query('status') status: 'active'| 'nonactive'): Promise<User[]> {
         return this.UserService.findAll()
     }
 
