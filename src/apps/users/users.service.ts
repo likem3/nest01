@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
-import { Repository } from 'typeorm';
+import { ObjectId, Repository } from 'typeorm';
 import { UserCreateDto } from './dto/users.dto';
 import * as bcrypt from "bcrypt"
 
@@ -47,6 +47,13 @@ export class UsersService {
         if(!deleteResponse.affected) throw new HttpException('Invalid id', HttpStatus.NOT_FOUND)
         else throw new HttpException('deleted', HttpStatus.NO_CONTENT)
         
+    }
+
+    async updateRefresh(user: User, refreshToken: string): Promise<number> {
+        const result = await this.userRepository.update(user.id, {
+            refresh_token: refreshToken
+        })
+        return result.affected
     }
 
     async auth(email: string, password: string): Promise<User|null> {

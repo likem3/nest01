@@ -8,7 +8,7 @@ export class AuthController {
 
   @Post('login/')
   login(@Body() requDto: RequestLoginDto): Promise<any> {
-    return this.authService.signIn(requDto)
+    return this.authService.signIn({ loginDto: requDto })
   }
 
 }

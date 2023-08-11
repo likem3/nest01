@@ -11,8 +11,10 @@ export class AuthService {
         private usersService: UsersService,
     ) {}
 
-    async signIn(requDto: RequestLoginDto): Promise<any> {
-        const user: User = await this.usersService.auth(requDto.email, requDto.password)
+
+
+    async signIn({ loginDto }: { loginDto: RequestLoginDto; }): Promise<any> {
+        const user: User = await this.usersService.auth(loginDto.email, loginDto.password)
         if (!user) throw new UnauthorizedException()
 
         const payload: jwtPayloadInterface = {
@@ -21,14 +23,16 @@ export class AuthService {
         }
 
         const accessToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: '60s',
+            secret: process.env.JWT_ACCESS_SECRET,
+            expiresIn: process.env.JWT_ACCESS_EXPIRED_TIME,
         });
 
         const refreshToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: '24h',
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: process.env.JWT_REFRESH_EXPIRED_TIME,
         });
+
+        await this.usersService.updateRefresh(user, refreshToken)
 
         return {
             access_token: accessToken,

@@ -23,4 +23,7 @@ export class User extends BaseCustomEntity {
 
     @Column({ default: true })
     is_active: boolean;
+
+    @Column({ nullable: true, default: null })
+    refresh_token: string;
 }
